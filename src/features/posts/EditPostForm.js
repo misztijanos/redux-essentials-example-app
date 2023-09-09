@@ -1,31 +1,28 @@
 import { useState } from 'react'
 
 import { useDispatch, useSelector } from 'react-redux'
+import { useHistory } from 'react-router-dom'
 
-import { postAdded } from './postsSlice'
+import { postUpdated } from './postsSlice'
 
-const AddPostForm = () => {
+const EditPostForm = ({ match }) => {
+  const { postId } = match.params
+  const post = useSelector((state) =>
+    state.posts.find((elem) => elem.id === postId)
+  )
+
   const dispatch = useDispatch()
+  const history = useHistory()
 
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [userId, setUserId] = useState('')
-
-  const users = useSelector((state) => state.users)
+  const [title, setTitle] = useState(post.title)
+  const [content, setContent] = useState(post.content)
 
   const onSavePostClicked = () => {
     if (title && content) {
-      dispatch(postAdded(title, content, userId))
-      setTitle('')
-      setContent('')
+      dispatch(postUpdated({ id: postId, title, content }))
+      history.push(`/posts/${postId}`)
     }
   }
-
-  const usersOptions = users.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name}
-    </option>
-  ))
   return (
     <section>
       <h2>Add a New Post</h2>
@@ -45,15 +42,6 @@ const AddPostForm = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <label htmlFor="postAuthor">Author:</label>
-        <select
-          name="postAuthor"
-          id="postAuthor"
-          onChange={(e) => setUserId(e.target.value)}
-        >
-          <option value=""></option>
-          {usersOptions}
-        </select>
         <button type="button" onClick={onSavePostClicked}>
           Save Post
         </button>
@@ -61,4 +49,4 @@ const AddPostForm = () => {
     </section>
   )
 }
-export default AddPostForm
+export default EditPostForm
